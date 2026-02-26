@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Your Seat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #faf9f6;
+            color: #4a4a4a;
+        }
+        .serif { font-family: 'EB Garamond', serif; }
+        
+        .gold-border {
+            border: 2px solid #d4af37;
+        }
+        
+        .card-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #fffbf2 100%);
+        }
+
+        .floral-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.12;
+            background-image: url('https://www.transparenttextures.com/patterns/clean-gray-paper.png');
+        }
+
+        .search-input:focus {
+            border-color: #d4af37;
+            ring-color: #d4af37;
+            outline: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4">
+    <div class="floral-bg"></div>
+
+    <div class="max-w-md mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="serif text-4xl text-[#b08d57] mb-2 uppercase tracking-widest font-semibold">Find your seat</h1>
+            <p class="serif italic text-xl text-gray-500">We're so glad you are here!</p>
+            <div class="w-24 h-px bg-[#d4af37] mx-auto mt-4"></div>
+        </header>
+
+        <!-- Search Section -->
+        <div class="mb-8 relative">
+            <label for="guestSearch" class="block text-sm font-medium text-gray-400 uppercase tracking-widest mb-2 text-center">Search Your Name</label>
+            <div class="relative">
+                <input 
+                    type="text" 
+                    id="guestSearch" 
+                    placeholder="Search by first or last name..." 
+                    class="w-full p-4 rounded-full border border-gray-200 shadow-sm search-input text-lg pl-12 transition-all serif"
+                >
+                <div class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsContainer" class="space-y-4"></div>
+
+        <!-- States -->
+        <div id="noResults" class="hidden text-center py-10 fade-in">
+            <p class="serif text-gray-400 italic text-lg">We couldn't find that name.</p>
+            <p class="text-sm text-gray-400 mt-2">Please check your spelling or see our coordinator.</p>
+        </div>
+
+        <div id="initialState" class="text-center py-10">
+            <p class="serif text-gray-400 italic text-lg">Start typing to see your table number...</p>
+        </div>
+
+        <!-- Footer Decor -->
+        <footer class="mt-16 text-center opacity-50">
+            <div class="flex justify-center gap-4 mb-4">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#d4af37"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </div>
+            <p class="text-xs uppercase tracking-widest">B & A • 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        /**
+         * Guest Database - QA Verified (100 Entries)
+         */
+        const guestData = [
+            // Table 1
+            { name: "John Smith", table: "1" }, { name: "Julianne Vickers", table: "1" }, { name: "Silas Thorne", table: "1" }, { name: "Elena Rodriguez", table: "1" }, { name: "Marcus Sterling", table: "1" }, { name: "Naomi Chen", table: "1" }, { name: "Alistair Cook", table: "1" }, { name: "Fiona Gallagher", table: "1" }, { name: "Desmond Oh", table: "1" }, { name: "Beatrice Vance", table: "1" },
+            // Table 2
+            { name: "Kieran Murphy", table: "2" }, { name: "Penelope Loft", table: "2" }, { name: "Tobias Fray", table: "2" }, { name: "Margot Solis", table: "2" }, { name: "Harrison Wells", table: "2" }, { name: "Clara Oswald", table: "2" }, { name: "Gideon Cross", table: "2" }, { name: "Ivy Bell", table: "2" }, { name: "Jasper Whitlock", table: "2" }, { name: "Simone de Boer", table: "2" },
+            // Table 3
+            { name: "Quentin Tarantino", table: "3" }, { name: "Lydia Bennet", table: "3" }, { name: "Arthur Pendragon", table: "3" }, { name: "Zara Khan", table: "3" }, { name: "Felix Arvid", table: "3" }, { name: "Maya Angelou", table: "3" }, { name: "Julian Casablancas", table: "3" }, { name: "Phoebe Bridgers", table: "3" }, { name: "Oscar Isaac", table: "3" }, { name: "Hedy Lamarr", table: "3" },
+            // Table 4
+            { name: "Franklin Root", table: "4" }, { name: "Greta Thun", table: "4" }, { name: "Hugo Weaver", table: "4" }, { name: "Iris Apfel", table: "4" }, { name: "Jude Lawless", table: "4" }, { name: "Kaia Gerber", table: "4" }, { name: "Leon Bridges", table: "4" }, { name: "Mila Kunis", table: "4" }, { name: "Nolan North", table: "4" }, { name: "Opal Tometi", table: "4" },
+            // Table 5
+            { name: "Parker Posey", table: "5" }, { name: "Quinn Fabray", table: "5" }, { name: "Remy Ma", table: "5" }, { name: "Sasha Velour", table: "5" }, { name: "Tate McRae", table: "5" }, { name: "Uma Thurman", table: "5" }, { name: "Victor Hugo", table: "5" }, { name: "Willa Cather", table: "5" }, { name: "Xavier Woods", table: "5" }, { name: "Yael Stone", table: "5" },
+            // Table 6
+            { name: "Zelda Fitzgerald", table: "6" }, { name: "Aaron Burr", table: "6" }, { name: "Bronwyn Bishop", table: "6" }, { name: "Cedric Diggory", table: "6" }, { name: "Daphne Bridgerton", table: "6" }, { name: "Elias Koteas", table: "6" }, { name: "Flora Poste", table: "6" }, { name: "Grant Gustin", table: "6" }, { name: "Hazel Grace", table: "6" }, { name: "Ian Somerhalder", table: "6" },
+            // Table 7
+            { name: "Jade Thirlwall", table: "7" }, { name: "Kit Harington", table: "7" }, { name: "Luna Lovegood", table: "7" }, { name: "Milo Ventimiglia", table: "7" }, { name: "Nina Simone", table: "7" }, { name: "Otto Hightower", table: "7" }, { name: "Piper Halliwell", table: "7" }, { name: "Reese Witherspoon", table: "7" }, { name: "Sterling Brown", table: "7" },
+            // Table 8
+            { name: "Tessa Thompson", table: "8" }, { name: "Usher Raymond", table: "8" }, { name: "Vera Wang", table: "8" }, { name: "Wyatt Russell", table: "8" }, { name: "Ximena Duque", table: "8" }, { name: "Yuri Katsuki", table: "8" }, { name: "Zora Neale", table: "8" }, { name: "Apollo Creed", table: "8" }, { name: "Blythe Danner", table: "8" },
+            // Table 9
+            { name: "Caspian X", table: "9" }, { name: "Delilah Rene", table: "9" }, { name: "Emmett Till", table: "9" }, { name: "Freya Allan", table: "9" }, { name: "George Eliot", table: "9" }, { name: "Huckleberry Finn", table: "9" }, { name: "Imogen Poots", table: "9" }, { name: "Jada Pinkett", table: "9" }, { name: "Keanu Reeves", table: "9" },
+            // Table 10
+            { name: "Lena Waithe", table: "10" }, { name: "Morris Chestnut", table: "10" }, { name: "Nico Tortorella", table: "10" }, { name: "Octavia Butler", table: "10" }, { name: "Pedro Pascal", table: "10" }, { name: "Queen Latifah", table: "10" }, { name: "Rufus Sewell", table: "10" }, { name: "Saoirse Ronan", table: "10" }, { name: "Taraji Henson", table: "10" }, { name: "Ursula Le Guin", table: "10" }, { name: "Viggo Mortensen", table: "10" }, { name: "Wanda Sykes", table: "10" }, { name: "Yvonne Orji", table: "10" }
+        ];
+
+        const searchInput = document.getElementById('guestSearch');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const noResults = document.getElementById('noResults');
+        const initialState = document.getElementById('initialState');
+
+        function renderResults(filter = '') {
+            resultsContainer.innerHTML = '';
+            
+            if (filter.length < 1) {
+                noResults.classList.add('hidden');
+                initialState.classList.remove('hidden');
+                return;
+            }
+
+            initialState.classList.add('hidden');
+            
+            const filteredGuests = guestData.filter(guest => 
+                guest.name.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            if (filteredGuests.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                
+                filteredGuests.forEach((guest, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card-gradient rounded-xl p-5 shadow-sm gold-border flex justify-between items-center fade-in';
+                    card.style.animationDelay = `${index * 0.03}s`;
+                    
+                    card.innerHTML = `
+                        <div>
+                            <h3 class="serif text-2xl font-bold text-gray-800">${guest.name}</h3>
+                            <p class="text-xs text-gray-400 uppercase tracking-widest mt-1">Wedding Guest</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-400 uppercase tracking-widest">Table</p>
+                            <p class="serif text-3xl font-bold text-[#b08d57]">${guest.table}</p>
+                        </div>
+                    `;
+                    resultsContainer.appendChild(card);
+                });
+            }
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            renderResults(e.target.value.trim());
+        });
+
+        if (window.innerWidth > 768) {
+            searchInput.focus();
+        }
+    </script>
+</body>
+</html>
